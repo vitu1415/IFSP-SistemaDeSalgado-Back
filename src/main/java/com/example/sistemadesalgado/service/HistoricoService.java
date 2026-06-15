@@ -1,7 +1,11 @@
 package com.example.sistemadesalgado.service;
 
+import com.example.sistemadesalgado.dao.ClienteDAO;
 import com.example.sistemadesalgado.dao.MovimentoDAO;
 import com.example.sistemadesalgado.dao.PedidoDAO;
+import com.example.sistemadesalgado.exception.ResourceNotFoundException;
+import com.example.sistemadesalgado.mapper.PedidoMapper;
+import com.example.sistemadesalgado.model.dto.HistoricoResponse;
 import com.example.sistemadesalgado.model.entity.Movimento;
 import com.example.sistemadesalgado.model.entity.Pedido;
 import com.example.sistemadesalgado.model.enums.StatusPedido;
@@ -18,8 +22,32 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class HistoricoService {
 
+    private static final int DIAS_HISTORICO = 30;
+
     private final PedidoDAO pedidoDAO;
     private final MovimentoDAO movimentoDAO;
+    private final ClienteDAO clienteDAO;
+    private final PedidoMapper pedidoMapper;
+
+    public HistoricoResponse buscarHistoricoCliente(Long clienteId) {
+        var cliente = clienteDAO.findById(clienteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com ID: " + clienteId));
+
+        LocalDateTime startDate = LocalDateTime.now().minusDays(DIAS_HISTORICO);
+
+        var pedidos = buscarHistoricoPedidos(clienteId, startDate);
+        var movimentos = buscarHistoricoMovimentos(clienteId, startDate);
+
+        HistoricoResponse response = new HistoricoResponse();
+        response.setClienteId(cliente.getId());
+        response.setClienteNome(cliente.getNome());
+        response.setPedidos(pedidos.stream().map(pedidoMapper::toResponse).toList());
+        response.setMovimentos(movimentos.stream().map(pedidoMapper::toMovimentoResponse).toList());
+        response.setResumoFinanceiro(gerarResumoFinanceiro(clienteId, startDate));
+        response.setEstatisticasPedidos(gerarEstatisticasPedidos(clienteId, startDate));
+
+        return response;
+    }
 
     public List<Pedido> buscarHistoricoPedidos(Long clienteId, LocalDateTime startDate) {
         return pedidoDAO.findHistoricoPedidosByClienteAndData(clienteId, startDate);

@@ -2,6 +2,11 @@ package com.example.sistemadesalgado.service;
 
 import com.example.sistemadesalgado.dao.PedidoDAO;
 import com.example.sistemadesalgado.dao.SalgadoDAO;
+import com.example.sistemadesalgado.exception.BusinessException;
+import com.example.sistemadesalgado.exception.InternalServerException;
+import com.example.sistemadesalgado.exception.ResourceNotFoundException;
+import com.example.sistemadesalgado.model.dto.ItemPedidoRequest;
+import com.example.sistemadesalgado.model.dto.PedidoRequest;
 import com.example.sistemadesalgado.model.entity.Cliente;
 import com.example.sistemadesalgado.model.entity.ItemPedido;
 import com.example.sistemadesalgado.model.entity.Pedido;
@@ -9,14 +14,15 @@ import com.example.sistemadesalgado.model.entity.Salgado;
 import com.example.sistemadesalgado.model.enums.StatusPedido;
 import com.example.sistemadesalgado.model.enums.TipoPreco;
 import com.example.sistemadesalgado.patterns.command.CommandInvoker;
-import com.example.sistemadesalgado.patterns.factory.SalgadoFactory;
 import com.example.sistemadesalgado.patterns.observer.PedidoSubject;
 import com.example.sistemadesalgado.patterns.state.PedidoContext;
 import com.example.sistemadesalgado.patterns.strategy.CalculoPrecoContext;
 import com.example.sistemadesalgado.patterns.strategy.CalculoPrecoStrategy;
+import com.example.sistemadesalgado.patterns.strategy.CalculoPrecoStrategyFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,25 +31,43 @@ public class PedidoService {
 
     private final PedidoDAO pedidoDAO;
     private final SalgadoDAO salgadoDAO;
-    private final MovimentoService movimentoService;
     private final CommandInvoker commandInvoker;
+    private final CalculoPrecoStrategyFactory calculoPrecoStrategyFactory;
     private final PedidoSubject pedidoSubject;
     private final CalculoPrecoContext calculoPrecoContext;
 
-    public Pedido criarPedido(Cliente cliente, List<ItemPedido> itens, CalculoPrecoStrategy strategy, TipoPreco tipoPreco) {
-        // Usa Factory Pattern para criar salgados se necessário
-        for (ItemPedido item : itens) {
-            if (item.getSalgado() == null) {
-                Salgado salgadoEntity = salgadoDAO.findBySabor(item.getSabor())
-                        .orElseThrow(() -> new RuntimeException("Salgado não encontrado: " + item.getSabor()));
-                item.setSalgado(salgadoEntity);
+    public Pedido criarPedido(Cliente cliente, List<ItemPedido> itens, PedidoRequest pedidoRequest) {
+        for (ItemPedidoRequest itemRequest : pedidoRequest.getItens()) {
+            Salgado salgado;
+            if (itemRequest.getSalgadoId() != null) {
+                salgado = salgadoDAO.findById(itemRequest.getSalgadoId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Salgado não encontrado"));
+            } else {
+                salgado = salgadoDAO.findBySabor(itemRequest.getSabor())
+                        .orElseThrow(() -> new ResourceNotFoundException("Salgado não encontrado"));
             }
+
+            if (salgado.getEstoque() < itemRequest.getQuantidade()) {
+                throw new BusinessException("Estoque insuficiente para salgado: " + salgado.getSabor());
+            }
+
+            ItemPedido item = new ItemPedido();
+            item.setSalgado(salgado);
+            item.setSabor(salgado.getSabor());
+            item.setQuantidade(itemRequest.getQuantidade());
+            item.setValorUnitario(salgado.getPreco());
+            itens.add(item);
+        }
             
+        TipoPreco tipoPreco = pedidoRequest.getTipoPreco() == null ? TipoPreco.PADRAO : pedidoRequest.getTipoPreco();
+        CalculoPrecoStrategy strategy = calculoPrecoStrategyFactory.obterStrategy(tipoPreco);
+
+        for(ItemPedido item : itens){
             // Calcula preço usando Strategy
             calculoPrecoContext.setStrategy(strategy);
             Double precoCalculado = calculoPrecoContext.executarCalculo(
-                item.getValorUnitario(), 
-                item.getQuantidade()
+                    item.getValorUnitario(),
+                    item.getQuantidade()
             );
             // Atualiza valor unitário se necessário
             item.setValorUnitario(precoCalculado / item.getQuantidade());
@@ -55,7 +79,7 @@ public class PedidoService {
         // Obtém o pedido criado pelo comando
         Pedido pedido = pedidoDAO.findByClienteId(cliente.getId()).stream()
                 .reduce((first, second) -> second)
-                .orElseThrow(() -> new RuntimeException("Falha ao criar pedido"));
+                .orElseThrow(() -> new InternalServerException("Falha ao criar pedido"));
 
         // Usa Observer Pattern para notificar observers
         pedidoSubject.notifyObservers(pedido);
@@ -69,23 +93,7 @@ public class PedidoService {
 
     public Pedido buscarPorId(Long id) {
         return pedidoDAO.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado com ID: " + id));
-    }
-
-    public List<Pedido> buscarPorCliente(Long clienteId) {
-        return pedidoDAO.findByClienteId(clienteId);
-    }
-
-    public List<Pedido> buscarPorClienteOrdenado(Long clienteId) {
-        return pedidoDAO.findByClienteIdOrderByDataCriacaoDesc(clienteId);
-    }
-
-    public List<Pedido> buscarPorStatus(StatusPedido status) {
-        return pedidoDAO.findByStatus(status);
-    }
-
-    public List<Pedido> buscarPorClienteEStatus(Long clienteId, StatusPedido status) {
-        return pedidoDAO.findByClienteIdAndStatus(clienteId, status);
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado com ID: " + id));
     }
 
     public Pedido estornarPedido(Long pedidoId) {
@@ -102,45 +110,5 @@ public class PedidoService {
         pedidoContext.cancelar(); // CANCELADO (simula estorno como cancelamento)
 
         return pedido;
-    }
-
-    public Pedido atualizarStatus(Long pedidoId, StatusPedido novoStatus) {
-        Pedido pedido = buscarPorId(pedidoId);
-        pedido.setStatus(novoStatus);
-        pedido = pedidoDAO.update(pedido);
-        
-        // Usa Observer Pattern para notificar mudança de status
-        pedidoSubject.notifyObservers(pedido);
-        
-        return pedido;
-    }
-
-    public List<Pedido> buscarHistoricoPorClienteEData(Long clienteId, java.time.LocalDateTime startDate) {
-        return pedidoDAO.findHistoricoPedidosByClienteAndData(clienteId, startDate);
-    }
-
-    public List<Pedido> buscarPorClienteEStatuses(Long clienteId, List<StatusPedido> statuses) {
-        return pedidoDAO.findPedidosByClienteAndStatuses(clienteId, statuses);
-    }
-
-    public void deletarPedido(Long id) {
-        if (!pedidoDAO.existsById(id)) {
-            throw new RuntimeException("Pedido não encontrado com ID: " + id);
-        }
-        pedidoDAO.deleteById(id);
-    }
-
-    public Double calcularValorTotalPedido(List<ItemPedido> itens, CalculoPrecoStrategy strategy) {
-        final var currentStrategy = strategy;
-        
-        return itens.stream()
-                .mapToDouble(item -> {
-                    calculoPrecoContext.setStrategy(currentStrategy);
-                    return calculoPrecoContext.executarCalculo(
-                        item.getValorUnitario(), 
-                        item.getQuantidade()
-                    );
-                })
-                .sum();
     }
 }

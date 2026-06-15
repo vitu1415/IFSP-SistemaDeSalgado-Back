@@ -51,6 +51,7 @@ public class PedidoCommand implements Command {
         pedido.setCliente(cliente);
         pedido.setStatus(StatusPedido.CRIADO);
         pedido.setDataCriacao(LocalDateTime.now());
+        pedido.setAtivo(true);
         pedido.setTipoPreco(tipoPreco);
         pedido.setValorTotal(calcularValorTotal());
         pedido.setItens(itens);
@@ -117,6 +118,7 @@ public class PedidoCommand implements Command {
 
         // 3. Atualizar status para ESTORNADO
         pedido.setStatus(StatusPedido.ESTORNADO);
+        pedido.setAtivo(false);
         pedidoDAO.update(pedido);
 
         System.out.println("PedidoCommand.undo() - Pedido desfeito com sucesso");

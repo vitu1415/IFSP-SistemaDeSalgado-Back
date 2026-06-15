@@ -19,6 +19,7 @@ public class PedidoResponse {
     private Double valorTotal;
     private StatusPedido status;
     private LocalDateTime dataCriacao;
+    private Boolean ativo;
     private TipoPreco tipoPreco;
     private List<ItemPedidoResponse> itens;
     private String mensagem;
@@ -26,6 +27,12 @@ public class PedidoResponse {
     public PedidoResponse(Long id, Long clienteId, String clienteNome, Double valorTotal,
                           StatusPedido status, LocalDateTime dataCriacao,
                           List<ItemPedidoResponse> itens, String mensagem) {
-        this(id, clienteId, clienteNome, valorTotal, status, dataCriacao, null, itens, mensagem);
+        this(id, clienteId, clienteNome, valorTotal, status, dataCriacao, null, null, itens, mensagem);
+    }
+
+    public PedidoResponse(Long id, Long clienteId, String clienteNome, Double valorTotal,
+                          StatusPedido status, LocalDateTime dataCriacao,
+                          TipoPreco tipoPreco, List<ItemPedidoResponse> itens, String mensagem) {
+        this(id, clienteId, clienteNome, valorTotal, status, dataCriacao, null, tipoPreco, itens, mensagem);
     }
 }

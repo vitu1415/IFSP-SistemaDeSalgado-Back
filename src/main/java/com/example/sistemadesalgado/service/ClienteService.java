@@ -1,6 +1,10 @@
 package com.example.sistemadesalgado.service;
 
 import com.example.sistemadesalgado.dao.ClienteDAO;
+import com.example.sistemadesalgado.exception.BusinessException;
+import com.example.sistemadesalgado.exception.ResourceNotFoundException;
+import com.example.sistemadesalgado.model.dto.LoginRequest;
+import com.example.sistemadesalgado.model.dto.LoginResponse;
 import com.example.sistemadesalgado.model.entity.Cliente;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +20,7 @@ public class ClienteService {
 
     public Cliente criarCliente(Cliente cliente) {
         if (clienteDAO.existsByEmail(cliente.getEmail())) {
-            throw new RuntimeException("Email já cadastrado: " + cliente.getEmail());
+            throw new BusinessException("Email já cadastrado: " + cliente.getEmail());
         }
         return clienteDAO.save(cliente);
     }
@@ -35,11 +39,11 @@ public class ClienteService {
 
     public Cliente atualizarCliente(Long id, Cliente clienteAtualizado) {
         Cliente clienteExistente = clienteDAO.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado com ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com ID: " + id));
 
         if (!clienteExistente.getEmail().equals(clienteAtualizado.getEmail()) &&
             clienteDAO.existsByEmail(clienteAtualizado.getEmail())) {
-            throw new RuntimeException("Email já cadastrado: " + clienteAtualizado.getEmail());
+            throw new BusinessException("Email já cadastrado: " + clienteAtualizado.getEmail());
         }
 
         clienteExistente.setNome(clienteAtualizado.getNome());
@@ -50,13 +54,34 @@ public class ClienteService {
     }
 
     public void deletarCliente(Long id) {
-        if (!clienteDAO.findById(id).isPresent()) {
-            throw new RuntimeException("Cliente não encontrado com ID: " + id);
+        if (clienteDAO.findById(id).isEmpty()) {
+            throw new ResourceNotFoundException("Cliente não encontrado com ID: " + id);
         }
         clienteDAO.deleteById(id);
     }
 
     public boolean verificarEmailExiste(String email) {
         return clienteDAO.existsByEmail(email);
+    }
+
+    public LoginResponse autenticar(LoginRequest loginRequest) {
+        var clienteOpt = buscarPorEmail(loginRequest.getEmail());
+
+        if (clienteOpt.isEmpty()) {
+            return new LoginResponse(null, null, null, "Email não encontrado");
+        }
+
+        var cliente = clienteOpt.get();
+
+        if (!cliente.getSenha().equals(loginRequest.getSenha())) {
+            return new LoginResponse(null, null, null, "Senha incorreta");
+        }
+
+        return new LoginResponse(
+                cliente.getId(),
+                cliente.getNome(),
+                cliente.getEmail(),
+                "Login realizado com sucesso"
+        );
     }
 }

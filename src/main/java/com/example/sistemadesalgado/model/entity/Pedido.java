@@ -31,6 +31,9 @@ public class Pedido {
     @Column(nullable = false)
     private Double valorTotal;
 
+    @Column(nullable = false)
+    private Boolean ativo;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private TipoPreco tipoPreco;
@@ -54,6 +57,9 @@ public class Pedido {
         }
         if (valorTotal == null) {
             valorTotal = 0.0;
+        }
+        if (ativo == null) {
+            ativo = true;
         }
         if (tipoPreco == null) {
             tipoPreco = TipoPreco.PADRAO;

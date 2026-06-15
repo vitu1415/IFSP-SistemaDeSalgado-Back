@@ -207,8 +207,7 @@ public class CommandPatternExample implements CommandLineRunner {
         
         System.out.println("\nApós o estorno:");
         System.out.println("  Status do Pedido: " + estornoPedidoCommand.getPedido().getStatus());
-        System.out.println("  Valor Estornado: R$ " + estornoPedidoCommand.getMovimentoEstorno().getValor());
-        System.out.println("  Tipo de Movimento: " + estornoPedidoCommand.getMovimentoEstorno().getTipoMovimento().getDescricao());
+        System.out.println("  Pedido ativo: " + estornoPedidoCommand.getPedido().getAtivo());
         
         // Atualizar salgado para verificar estoque
         salgado = salgadoRepository.findById(salgado.getId()).orElseThrow();
@@ -220,6 +219,7 @@ public class CommandPatternExample implements CommandLineRunner {
         
         System.out.println("Após o undo do estorno:");
         System.out.println("  Status do Pedido: " + estornoPedidoCommand.getPedido().getStatus());
+        System.out.println("  Pedido ativo: " + estornoPedidoCommand.getPedido().getAtivo());
         
         // Atualizar salgado para verificar estoque
         salgado = salgadoRepository.findById(salgado.getId()).orElseThrow();
