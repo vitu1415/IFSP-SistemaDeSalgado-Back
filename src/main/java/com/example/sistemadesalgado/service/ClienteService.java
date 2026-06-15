@@ -53,17 +53,6 @@ public class ClienteService {
         return clienteDAO.update(clienteExistente);
     }
 
-    public void deletarCliente(Long id) {
-        if (clienteDAO.findById(id).isEmpty()) {
-            throw new ResourceNotFoundException("Cliente não encontrado com ID: " + id);
-        }
-        clienteDAO.deleteById(id);
-    }
-
-    public boolean verificarEmailExiste(String email) {
-        return clienteDAO.existsByEmail(email);
-    }
-
     public LoginResponse autenticar(LoginRequest loginRequest) {
         var clienteOpt = buscarPorEmail(loginRequest.getEmail());
 
