@@ -7,7 +7,7 @@ import com.example.sistemadesalgado.model.entity.Cliente;
 import com.example.sistemadesalgado.model.entity.ItemPedido;
 import com.example.sistemadesalgado.model.entity.Movimento;
 import com.example.sistemadesalgado.model.entity.Pedido;
-import com.example.sistemadesalgado.model.entity.Salgado;
+import com.example.sistemadesalgado.model.entity.SalgadoEstoque;
 import com.example.sistemadesalgado.model.enums.StatusPedido;
 import com.example.sistemadesalgado.model.enums.TipoMovimento;
 import com.example.sistemadesalgado.model.enums.TipoPreco;
@@ -31,7 +31,7 @@ public class PedidoCommand implements Command {
     private TipoPreco tipoPreco;
     private Pedido pedido;
     private Movimento movimento;
-    private List<Salgado> salgadosAtualizados;
+    private List<SalgadoEstoque> salgadosAtualizados;
 
     public void setPedidoData(Cliente cliente, List<ItemPedido> itens, TipoPreco tipoPreco) {
         this.cliente = cliente;
@@ -73,17 +73,17 @@ public class PedidoCommand implements Command {
 
         // 5. Atualizar estoque dos salgados
         for (ItemPedido item : itens) {
-            Salgado salgado = salgadoDAO.findById(item.getSalgado().getId()).orElseThrow();
-            Integer estoqueAtual = salgado.getEstoque();
+            SalgadoEstoque salgadoEstoque = salgadoDAO.findById(item.getSalgadoEstoque().getId()).orElseThrow();
+            Integer estoqueAtual = salgadoEstoque.getEstoque();
             Integer novoEstoque = estoqueAtual - item.getQuantidade();
             
             if (novoEstoque < 0) {
-                throw new RuntimeException("Estoque insuficiente para salgado: " + salgado.getSabor());
+                throw new RuntimeException("Estoque insuficiente para salgado: " + salgadoEstoque.getSabor());
             }
             
-            salgado.setEstoque(novoEstoque);
-            salgado = salgadoDAO.update(salgado);
-            salgadosAtualizados.add(salgado);
+            salgadoEstoque.setEstoque(novoEstoque);
+            salgadoEstoque = salgadoDAO.update(salgadoEstoque);
+            salgadosAtualizados.add(salgadoEstoque);
         }
 
         // 6. Atualizar status para CONFIRMADO
@@ -104,11 +104,11 @@ public class PedidoCommand implements Command {
 
         // 1. Restaurar estoque dos salgados
         for (ItemPedido item : itens) {
-            Salgado salgado = salgadoDAO.findById(item.getSalgado().getId()).orElseThrow();
-            Integer estoqueAtual = salgado.getEstoque();
+            SalgadoEstoque salgadoEstoque = salgadoDAO.findById(item.getSalgadoEstoque().getId()).orElseThrow();
+            Integer estoqueAtual = salgadoEstoque.getEstoque();
             Integer novoEstoque = estoqueAtual + item.getQuantidade();
-            salgado.setEstoque(novoEstoque);
-            salgadoDAO.update(salgado);
+            salgadoEstoque.setEstoque(novoEstoque);
+            salgadoDAO.update(salgadoEstoque);
         }
 
         // 2. Remover movimento financeiro

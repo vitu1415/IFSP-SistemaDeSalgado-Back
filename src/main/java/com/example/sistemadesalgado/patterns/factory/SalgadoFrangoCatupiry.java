@@ -1,19 +1,19 @@
 package com.example.sistemadesalgado.patterns.factory;
 
-public class SalgadoQueijo implements Salgado {
+public class SalgadoFrangoCatupiry implements Salgado {
 
     @Override
     public String getSabor() {
-        return "Queijo";
+        return "Frango com Catupiry";
     }
 
     @Override
     public double getPreco() {
-        return 7.50;
+        return 9.50;
     }
 
     @Override
     public void preparar() {
-        System.out.println("Preparando salgado de queijo");
+        System.out.println("Preparando salgado de frango com catupiry");
     }
 }

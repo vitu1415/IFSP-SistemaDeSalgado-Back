@@ -3,7 +3,7 @@ package com.example.sistemadesalgado.patterns.observer;
 import com.example.sistemadesalgado.dao.SalgadoDAO;
 import com.example.sistemadesalgado.model.entity.ItemPedido;
 import com.example.sistemadesalgado.model.entity.Pedido;
-import com.example.sistemadesalgado.model.entity.Salgado;
+import com.example.sistemadesalgado.model.entity.SalgadoEstoque;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -27,27 +27,27 @@ public class EstoqueObserver implements Observer {
 
         // Registrar estoque antes da atualização
         for (ItemPedido item : pedido.getItens()) {
-            Salgado salgado = salgadoDAO.findById(item.getSalgado().getId()).orElseThrow();
-            estoqueAntes.put(salgado.getSabor(), salgado.getEstoque());
+            SalgadoEstoque salgadoEstoque = salgadoDAO.findById(item.getSalgadoEstoque().getId()).orElseThrow();
+            estoqueAntes.put(salgadoEstoque.getSabor(), salgadoEstoque.getEstoque());
         }
 
         // Atualizar estoque baseado no status do pedido
         if (pedido.getStatus().toString().equals("CONFIRMADO")) {
             // Deduzir estoque quando pedido é confirmado
             for (ItemPedido item : pedido.getItens()) {
-                Salgado salgado = salgadoDAO.findById(item.getSalgado().getId()).orElseThrow();
-                Integer estoqueAtual = salgado.getEstoque();
+                SalgadoEstoque salgadoEstoque = salgadoDAO.findById(item.getSalgadoEstoque().getId()).orElseThrow();
+                Integer estoqueAtual = salgadoEstoque.getEstoque();
                 Integer novoEstoque = estoqueAtual - item.getQuantidade();
                 
                 if (novoEstoque < 0) {
-                    throw new RuntimeException("Estoque insuficiente para salgado: " + salgado.getSabor());
+                    throw new RuntimeException("Estoque insuficiente para salgado: " + salgadoEstoque.getSabor());
                 }
                 
-                salgado.setEstoque(novoEstoque);
-                salgadoDAO.update(salgado);
-                estoqueDepois.put(salgado.getSabor(), novoEstoque);
+                salgadoEstoque.setEstoque(novoEstoque);
+                salgadoDAO.update(salgadoEstoque);
+                estoqueDepois.put(salgadoEstoque.getSabor(), novoEstoque);
                 
-                System.out.println("    Salgado: " + salgado.getSabor() + 
+                System.out.println("    Salgado: " + salgadoEstoque.getSabor() +
                                  " | Quantidade: " + item.getQuantidade() +
                                  " | Estoque antes: " + estoqueAtual + 
                                  " | Estoque depois: " + novoEstoque);
@@ -55,15 +55,15 @@ public class EstoqueObserver implements Observer {
         } else if (pedido.getStatus().toString().equals("ESTORNADO")) {
             // Restaurar estoque quando pedido é estornado
             for (ItemPedido item : pedido.getItens()) {
-                Salgado salgado = salgadoDAO.findById(item.getSalgado().getId()).orElseThrow();
-                Integer estoqueAtual = salgado.getEstoque();
+                SalgadoEstoque salgadoEstoque = salgadoDAO.findById(item.getSalgadoEstoque().getId()).orElseThrow();
+                Integer estoqueAtual = salgadoEstoque.getEstoque();
                 Integer novoEstoque = estoqueAtual + item.getQuantidade();
                 
-                salgado.setEstoque(novoEstoque);
-                salgadoDAO.update(salgado);
-                estoqueDepois.put(salgado.getSabor(), novoEstoque);
+                salgadoEstoque.setEstoque(novoEstoque);
+                salgadoDAO.update(salgadoEstoque);
+                estoqueDepois.put(salgadoEstoque.getSabor(), novoEstoque);
                 
-                System.out.println("    Salgado: " + salgado.getSabor() + 
+                System.out.println("    Salgado: " + salgadoEstoque.getSabor() +
                                  " | Quantidade restaurada: " + item.getQuantidade() +
                                  " | Estoque antes: " + estoqueAtual + 
                                  " | Estoque depois: " + novoEstoque);

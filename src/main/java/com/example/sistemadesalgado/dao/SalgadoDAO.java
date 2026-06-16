@@ -1,29 +1,29 @@
 package com.example.sistemadesalgado.dao;
 
-import com.example.sistemadesalgado.model.entity.Salgado;
+import com.example.sistemadesalgado.model.entity.SalgadoEstoque;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface SalgadoDAO {
 
-    Salgado save(Salgado salgado);
+    SalgadoEstoque save(SalgadoEstoque salgadoEstoque);
 
-    Optional<Salgado> findById(Long id);
+    Optional<SalgadoEstoque> findById(Long id);
 
-    Optional<Salgado> findBySabor(String sabor);
+    Optional<SalgadoEstoque> findBySabor(String sabor);
 
-    List<Salgado> findAll();
+    List<SalgadoEstoque> findAll();
 
-    List<Salgado> findByEstoqueGreaterThan(Integer estoque);
+    List<SalgadoEstoque> findByEstoqueGreaterThan(Integer estoque);
 
-    List<Salgado> findByEstoqueGreaterThanOrderByPrecoAsc(Integer estoque);
+    List<SalgadoEstoque> findByEstoqueGreaterThanOrderByPrecoAsc(Integer estoque);
 
-    List<Salgado> findBySaborContainingIgnoreCase(String sabor);
+    List<SalgadoEstoque> findBySaborContainingIgnoreCase(String sabor);
 
     boolean existsBySabor(String sabor);
 
-    Salgado update(Salgado salgado);
+    SalgadoEstoque update(SalgadoEstoque salgadoEstoque);
 
     void deleteById(Long id);
 }

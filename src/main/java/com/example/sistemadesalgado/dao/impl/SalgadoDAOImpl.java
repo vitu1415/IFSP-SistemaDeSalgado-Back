@@ -1,7 +1,7 @@
 package com.example.sistemadesalgado.dao.impl;
 
 import com.example.sistemadesalgado.dao.SalgadoDAO;
-import com.example.sistemadesalgado.model.entity.Salgado;
+import com.example.sistemadesalgado.model.entity.SalgadoEstoque;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -20,21 +20,21 @@ public class SalgadoDAOImpl implements SalgadoDAO {
 
     @Override
     @Transactional
-    public Salgado save(Salgado salgado) {
-        entityManager.persist(salgado);
-        return salgado;
+    public SalgadoEstoque save(SalgadoEstoque salgadoEstoque) {
+        entityManager.persist(salgadoEstoque);
+        return salgadoEstoque;
     }
 
     @Override
-    public Optional<Salgado> findById(Long id) {
-        Salgado salgado = entityManager.find(Salgado.class, id);
-        return Optional.ofNullable(salgado);
+    public Optional<SalgadoEstoque> findById(Long id) {
+        SalgadoEstoque salgadoEstoque = entityManager.find(SalgadoEstoque.class, id);
+        return Optional.ofNullable(salgadoEstoque);
     }
 
     @Override
-    public Optional<Salgado> findBySabor(String sabor) {
-        TypedQuery<Salgado> query = entityManager.createQuery(
-                "SELECT s FROM Salgado s WHERE s.sabor = :sabor", Salgado.class);
+    public Optional<SalgadoEstoque> findBySabor(String sabor) {
+        TypedQuery<SalgadoEstoque> query = entityManager.createQuery(
+                "SELECT s FROM SalgadoEstoque s WHERE s.sabor = :sabor", SalgadoEstoque.class);
         query.setParameter("sabor", sabor);
         try {
             return Optional.of(query.getSingleResult());
@@ -44,32 +44,32 @@ public class SalgadoDAOImpl implements SalgadoDAO {
     }
 
     @Override
-    public List<Salgado> findAll() {
-        TypedQuery<Salgado> query = entityManager.createQuery(
-                "SELECT s FROM Salgado s", Salgado.class);
+    public List<SalgadoEstoque> findAll() {
+        TypedQuery<SalgadoEstoque> query = entityManager.createQuery(
+                "SELECT s FROM SalgadoEstoque s", SalgadoEstoque.class);
         return query.getResultList();
     }
 
     @Override
-    public List<Salgado> findByEstoqueGreaterThan(Integer estoque) {
-        TypedQuery<Salgado> query = entityManager.createQuery(
-                "SELECT s FROM Salgado s WHERE s.estoque > :estoque", Salgado.class);
+    public List<SalgadoEstoque> findByEstoqueGreaterThan(Integer estoque) {
+        TypedQuery<SalgadoEstoque> query = entityManager.createQuery(
+                "SELECT s FROM SalgadoEstoque s WHERE s.estoque > :estoque", SalgadoEstoque.class);
         query.setParameter("estoque", estoque);
         return query.getResultList();
     }
 
     @Override
-    public List<Salgado> findByEstoqueGreaterThanOrderByPrecoAsc(Integer estoque) {
-        TypedQuery<Salgado> query = entityManager.createQuery(
-                "SELECT s FROM Salgado s WHERE s.estoque > :estoque ORDER BY s.preco ASC", Salgado.class);
+    public List<SalgadoEstoque> findByEstoqueGreaterThanOrderByPrecoAsc(Integer estoque) {
+        TypedQuery<SalgadoEstoque> query = entityManager.createQuery(
+                "SELECT s FROM SalgadoEstoque s WHERE s.estoque > :estoque ORDER BY s.preco ASC", SalgadoEstoque.class);
         query.setParameter("estoque", estoque);
         return query.getResultList();
     }
 
     @Override
-    public List<Salgado> findBySaborContainingIgnoreCase(String sabor) {
-        TypedQuery<Salgado> query = entityManager.createQuery(
-                "SELECT s FROM Salgado s WHERE LOWER(s.sabor) LIKE LOWER(:sabor)", Salgado.class);
+    public List<SalgadoEstoque> findBySaborContainingIgnoreCase(String sabor) {
+        TypedQuery<SalgadoEstoque> query = entityManager.createQuery(
+                "SELECT s FROM SalgadoEstoque s WHERE LOWER(s.sabor) LIKE LOWER(:sabor)", SalgadoEstoque.class);
         query.setParameter("sabor", "%" + sabor + "%");
         return query.getResultList();
     }
@@ -77,23 +77,23 @@ public class SalgadoDAOImpl implements SalgadoDAO {
     @Override
     public boolean existsBySabor(String sabor) {
         TypedQuery<Long> query = entityManager.createQuery(
-                "SELECT COUNT(s) FROM Salgado s WHERE s.sabor = :sabor", Long.class);
+                "SELECT COUNT(s) FROM SalgadoEstoque s WHERE s.sabor = :sabor", Long.class);
         query.setParameter("sabor", sabor);
         return query.getSingleResult() > 0;
     }
 
     @Override
     @Transactional
-    public Salgado update(Salgado salgado) {
-        return entityManager.merge(salgado);
+    public SalgadoEstoque update(SalgadoEstoque salgadoEstoque) {
+        return entityManager.merge(salgadoEstoque);
     }
 
     @Override
     @Transactional
     public void deleteById(Long id) {
-        Salgado salgado = entityManager.find(Salgado.class, id);
-        if (salgado != null) {
-            entityManager.remove(salgado);
+        SalgadoEstoque salgadoEstoque = entityManager.find(SalgadoEstoque.class, id);
+        if (salgadoEstoque != null) {
+            entityManager.remove(salgadoEstoque);
         }
     }
 }

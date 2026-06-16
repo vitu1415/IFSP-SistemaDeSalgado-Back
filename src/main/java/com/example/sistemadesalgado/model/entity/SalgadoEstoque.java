@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Salgado {
+public class SalgadoEstoque {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

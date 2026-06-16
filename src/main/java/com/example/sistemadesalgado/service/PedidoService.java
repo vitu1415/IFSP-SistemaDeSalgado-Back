@@ -10,8 +10,7 @@ import com.example.sistemadesalgado.model.dto.PedidoRequest;
 import com.example.sistemadesalgado.model.entity.Cliente;
 import com.example.sistemadesalgado.model.entity.ItemPedido;
 import com.example.sistemadesalgado.model.entity.Pedido;
-import com.example.sistemadesalgado.model.entity.Salgado;
-import com.example.sistemadesalgado.model.enums.StatusPedido;
+import com.example.sistemadesalgado.model.entity.SalgadoEstoque;
 import com.example.sistemadesalgado.model.enums.TipoPreco;
 import com.example.sistemadesalgado.patterns.command.CommandInvoker;
 import com.example.sistemadesalgado.patterns.observer.PedidoSubject;
@@ -22,7 +21,6 @@ import com.example.sistemadesalgado.patterns.strategy.CalculoPrecoStrategyFactor
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -38,24 +36,24 @@ public class PedidoService {
 
     public Pedido criarPedido(Cliente cliente, List<ItemPedido> itens, PedidoRequest pedidoRequest) {
         for (ItemPedidoRequest itemRequest : pedidoRequest.getItens()) {
-            Salgado salgado;
+            SalgadoEstoque salgadoEstoque;
             if (itemRequest.getSalgadoId() != null) {
-                salgado = salgadoDAO.findById(itemRequest.getSalgadoId())
+                salgadoEstoque = salgadoDAO.findById(itemRequest.getSalgadoId())
                         .orElseThrow(() -> new ResourceNotFoundException("Salgado não encontrado"));
             } else {
-                salgado = salgadoDAO.findBySabor(itemRequest.getSabor())
+                salgadoEstoque = salgadoDAO.findBySabor(itemRequest.getSabor())
                         .orElseThrow(() -> new ResourceNotFoundException("Salgado não encontrado"));
             }
 
-            if (salgado.getEstoque() < itemRequest.getQuantidade()) {
-                throw new BusinessException("Estoque insuficiente para salgado: " + salgado.getSabor());
+            if (salgadoEstoque.getEstoque() < itemRequest.getQuantidade()) {
+                throw new BusinessException("Estoque insuficiente para salgado: " + salgadoEstoque.getSabor());
             }
 
             ItemPedido item = new ItemPedido();
-            item.setSalgado(salgado);
-            item.setSabor(salgado.getSabor());
+            item.setSalgadoEstoque(salgadoEstoque);
+            item.setSabor(salgadoEstoque.getSabor());
             item.setQuantidade(itemRequest.getQuantidade());
-            item.setValorUnitario(salgado.getPreco());
+            item.setValorUnitario(salgadoEstoque.getPreco());
             itens.add(item);
         }
             

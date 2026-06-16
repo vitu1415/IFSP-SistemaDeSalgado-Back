@@ -16,7 +16,7 @@ public class PedidoMapper {
     public ItemPedidoResponse toItemResponse(ItemPedido item) {
         return new ItemPedidoResponse(
                 item.getId(),
-                item.getSalgado().getId(),
+                item.getSalgadoEstoque().getId(),
                 item.getSabor(),
                 item.getQuantidade(),
                 item.getValorUnitario(),

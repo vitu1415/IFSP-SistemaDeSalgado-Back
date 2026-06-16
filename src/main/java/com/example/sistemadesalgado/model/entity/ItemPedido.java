@@ -24,7 +24,7 @@ public class ItemPedido {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "salgado_id", nullable = false)
-    private Salgado salgado;
+    private SalgadoEstoque salgadoEstoque;
 
     @Column(nullable = false, length = 100)
     private String sabor;
@@ -37,8 +37,8 @@ public class ItemPedido {
 
     @PrePersist
     protected void onCreate() {
-        if (sabor == null && salgado != null) {
-            sabor = salgado.getSabor();
+        if (sabor == null && salgadoEstoque != null) {
+            sabor = salgadoEstoque.getSabor();
         }
     }
 }

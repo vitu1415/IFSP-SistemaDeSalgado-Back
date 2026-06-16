@@ -6,9 +6,14 @@ import com.example.sistemadesalgado.dao.SalgadoDAO;
 import com.example.sistemadesalgado.model.entity.Cliente;
 import com.example.sistemadesalgado.model.entity.ItemPedido;
 import com.example.sistemadesalgado.model.entity.Pedido;
-import com.example.sistemadesalgado.model.entity.Salgado;
+import com.example.sistemadesalgado.model.entity.SalgadoEstoque;
 import com.example.sistemadesalgado.model.enums.StatusPedido;
+import com.example.sistemadesalgado.patterns.factory.Salgado;
 import lombok.RequiredArgsConstructor;
+import com.example.sistemadesalgado.patterns.factory.concretas.FrangoFactory;
+import com.example.sistemadesalgado.patterns.factory.concretas.QueijoFactory;
+import com.example.sistemadesalgado.patterns.factory.concretas.CarneFactory;
+import com.example.sistemadesalgado.patterns.factory.concretas.FrangoCatupiryFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -60,44 +65,46 @@ public class ObserverPatternExample implements CommandLineRunner {
         System.out.println("Cliente: " + cliente.getNome());
 
         // 2. Criar ou buscar salgados
-        Salgado salgado1;
+        SalgadoEstoque salgadoEstoque1;
         if (salgadoDAO.existsBySabor("Frango")) {
-            salgado1 = salgadoDAO.findBySabor("Frango").orElseThrow();
+            salgadoEstoque1 = salgadoDAO.findBySabor("Frango").orElseThrow();
         } else {
-            salgado1 = Salgado.builder()
-                    .sabor("Frango")
-                    .preco(5.00)
+            Salgado salgado1 = new FrangoFactory().criarSalgado();
+            salgadoEstoque1 = SalgadoEstoque.builder()
+                    .sabor(salgado1.getSabor())
+                    .preco(salgado1.getPreco())
                     .estoque(100)
                     .build();
-            salgado1 = salgadoDAO.save(salgado1);
+            salgadoEstoque1 = salgadoDAO.save(salgadoEstoque1);
         }
 
-        Salgado salgado2;
+        SalgadoEstoque salgadoEstoque2;
         if (salgadoDAO.existsBySabor("Queijo")) {
-            salgado2 = salgadoDAO.findBySabor("Queijo").orElseThrow();
+            salgadoEstoque2 = salgadoDAO.findBySabor("Queijo").orElseThrow();
         } else {
-            salgado2 = Salgado.builder()
-                    .sabor("Queijo")
-                    .preco(4.50)
+            Salgado salgado2 = new QueijoFactory().criarSalgado();
+            salgadoEstoque2 = SalgadoEstoque.builder()
+                    .sabor(salgado2.getSabor())
+                    .preco(salgado2.getPreco())
                     .estoque(80)
                     .build();
-            salgado2 = salgadoDAO.save(salgado2);
+            salgadoEstoque2 = salgadoDAO.save(salgadoEstoque2);
         }
 
         System.out.println("Salgados:");
-        System.out.println("  - Frango: " + salgado1.getEstoque() + " unidades");
-        System.out.println("  - Queijo: " + salgado2.getEstoque() + " unidades");
+        System.out.println("  - Frango: " + salgadoEstoque1.getEstoque() + " unidades");
+        System.out.println("  - Queijo: " + salgadoEstoque2.getEstoque() + " unidades");
 
         // 3. Criar itens
         ItemPedido item1 = ItemPedido.builder()
-                .salgado(salgado1)
+                .salgadoEstoque(salgadoEstoque1)
                 .sabor("Frango")
                 .quantidade(10)
                 .valorUnitario(5.00)
                 .build();
 
         ItemPedido item2 = ItemPedido.builder()
-                .salgado(salgado2)
+                .salgadoEstoque(salgadoEstoque2)
                 .sabor("Queijo")
                 .quantidade(15)
                 .valorUnitario(4.50)
@@ -129,13 +136,13 @@ public class ObserverPatternExample implements CommandLineRunner {
         pedidoSubject.notifyObservers(savedPedido);
 
         // 6. Verificar estoque
-        salgado1 = salgadoDAO.findById(salgado1.getId()).orElseThrow();
-        salgado2 = salgadoDAO.findById(salgado2.getId()).orElseThrow();
+        salgadoEstoque1 = salgadoDAO.findById(salgadoEstoque1.getId()).orElseThrow();
+        salgadoEstoque2 = salgadoDAO.findById(salgadoEstoque2.getId()).orElseThrow();
 
         System.out.println("--- APÓS NOTIFICAÇÃO ---");
         System.out.println("Estoque atualizado:");
-        System.out.println("  - Frango: " + salgado1.getEstoque() + " unidades");
-        System.out.println("  - Queijo: " + salgado2.getEstoque() + " unidades");
+        System.out.println("  - Frango: " + salgadoEstoque1.getEstoque() + " unidades");
+        System.out.println("  - Queijo: " + salgadoEstoque2.getEstoque() + " unidades");
 
         System.out.println("\n### FIM DO EXEMPLO 1 ###\n");
     }
@@ -158,22 +165,23 @@ public class ObserverPatternExample implements CommandLineRunner {
         System.out.println("Cliente: " + cliente.getNome());
 
         // 2. Criar ou buscar salgado
-        Salgado salgado;
+        SalgadoEstoque salgadoEstoque;
         if (salgadoDAO.existsBySabor("Catupiry")) {
-            salgado = salgadoDAO.findBySabor("Catupiry").orElseThrow();
+            salgadoEstoque = salgadoDAO.findBySabor("Catupiry").orElseThrow();
         } else {
-            salgado = Salgado.builder()
-                    .sabor("Catupiry")
-                    .preco(6.50)
+            Salgado domain = new FrangoCatupiryFactory().criarSalgado();
+            salgadoEstoque = SalgadoEstoque.builder()
+                    .sabor(domain.getSabor())
+                    .preco(domain.getPreco())
                     .estoque(50)
                     .build();
-            salgado = salgadoDAO.save(salgado);
+            salgadoEstoque = salgadoDAO.save(salgadoEstoque);
         }
-        System.out.println("Salgado: " + salgado.getSabor() + " (Estoque: " + salgado.getEstoque() + ")");
+        System.out.println("Salgado: " + salgadoEstoque.getSabor() + " (Estoque: " + salgadoEstoque.getEstoque() + ")");
 
         // 3. Criar pedido confirmado
         ItemPedido item = ItemPedido.builder()
-                .salgado(salgado)
+                .salgadoEstoque(salgadoEstoque)
                 .sabor("Catupiry")
                 .quantidade(20)
                 .valorUnitario(6.50)
@@ -192,11 +200,11 @@ public class ObserverPatternExample implements CommandLineRunner {
         Pedido savedPedido = pedidoDAO.save(pedido);
 
         // Deduzir estoque
-        salgado.setEstoque(salgado.getEstoque() - 20);
-        salgado = salgadoDAO.update(salgado);
+        salgadoEstoque.setEstoque(salgadoEstoque.getEstoque() - 20);
+        salgadoEstoque = salgadoDAO.update(salgadoEstoque);
 
         System.out.println("Pedido confirmado (ID: " + savedPedido.getId() + ")");
-        System.out.println("Estoque após dedução: " + salgado.getEstoque());
+        System.out.println("Estoque após dedução: " + salgadoEstoque.getEstoque());
 
         // 4. Estornar e notificar
         System.out.println("\n--- ESTORNANDO PEDIDO ---");
@@ -205,9 +213,9 @@ public class ObserverPatternExample implements CommandLineRunner {
         pedidoSubject.notifyObservers(savedPedido);
 
         // 5. Verificar estoque
-        salgado = salgadoDAO.findById(salgado.getId()).orElseThrow();
+        salgadoEstoque = salgadoDAO.findById(salgadoEstoque.getId()).orElseThrow();
         System.out.println("--- APÓS ESTORNO ---");
-        System.out.println("Estoque restaurado: " + salgado.getEstoque() + " unidades");
+        System.out.println("Estoque restaurado: " + salgadoEstoque.getEstoque() + " unidades");
 
         System.out.println("\n### FIM DO EXEMPLO 2 ###\n");
     }
@@ -236,20 +244,21 @@ public class ObserverPatternExample implements CommandLineRunner {
             cliente = clienteDAO.save(cliente);
         }
 
-        Salgado salgado;
+        SalgadoEstoque salgadoEstoque;
         if (salgadoDAO.existsBySabor("Carne")) {
-            salgado = salgadoDAO.findBySabor("Carne").orElseThrow();
+            salgadoEstoque = salgadoDAO.findBySabor("Carne").orElseThrow();
         } else {
-            salgado = Salgado.builder()
-                    .sabor("Carne")
-                    .preco(5.50)
+            com.example.sistemadesalgado.patterns.factory.Salgado domain = new CarneFactory().criarSalgado();
+            salgadoEstoque = SalgadoEstoque.builder()
+                    .sabor(domain.getSabor())
+                    .preco(domain.getPreco())
                     .estoque(30)
                     .build();
-            salgado = salgadoDAO.save(salgado);
+            salgadoEstoque = salgadoDAO.save(salgadoEstoque);
         }
 
         ItemPedido item = ItemPedido.builder()
-                .salgado(salgado)
+                .salgadoEstoque(salgadoEstoque)
                 .sabor("Carne")
                 .quantidade(5)
                 .valorUnitario(5.50)

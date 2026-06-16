@@ -4,7 +4,7 @@ import com.example.sistemadesalgado.dao.PedidoDAO;
 import com.example.sistemadesalgado.dao.SalgadoDAO;
 import com.example.sistemadesalgado.model.entity.ItemPedido;
 import com.example.sistemadesalgado.model.entity.Pedido;
-import com.example.sistemadesalgado.model.entity.Salgado;
+import com.example.sistemadesalgado.model.entity.SalgadoEstoque;
 import com.example.sistemadesalgado.model.enums.StatusPedido;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -37,11 +37,11 @@ public class EstornoPedidoCommand implements Command {
         }
 
         for (ItemPedido item : itens) {
-            Salgado salgado = salgadoDAO.findById(item.getSalgado().getId()).orElseThrow();
-            Integer estoqueAtual = salgado.getEstoque();
+            SalgadoEstoque salgadoEstoque = salgadoDAO.findById(item.getSalgadoEstoque().getId()).orElseThrow();
+            Integer estoqueAtual = salgadoEstoque.getEstoque();
             Integer novoEstoque = estoqueAtual + item.getQuantidade();
-            salgado.setEstoque(novoEstoque);
-            salgadoDAO.update(salgado);
+            salgadoEstoque.setEstoque(novoEstoque);
+            salgadoDAO.update(salgadoEstoque);
         }
 
         pedido.setStatus(StatusPedido.ESTORNADO);
@@ -61,16 +61,16 @@ public class EstornoPedidoCommand implements Command {
         }
 
         for (ItemPedido item : itens) {
-            Salgado salgado = salgadoDAO.findById(item.getSalgado().getId()).orElseThrow();
-            Integer estoqueAtual = salgado.getEstoque();
+            SalgadoEstoque salgadoEstoque = salgadoDAO.findById(item.getSalgadoEstoque().getId()).orElseThrow();
+            Integer estoqueAtual = salgadoEstoque.getEstoque();
             Integer novoEstoque = estoqueAtual - item.getQuantidade();
 
             if (novoEstoque < 0) {
-                throw new RuntimeException("Estoque insuficiente para desfazer estorno do salgado: " + salgado.getSabor());
+                throw new RuntimeException("Estoque insuficiente para desfazer estorno do salgado: " + salgadoEstoque.getSabor());
             }
 
-            salgado.setEstoque(novoEstoque);
-            salgadoDAO.update(salgado);
+            salgadoEstoque.setEstoque(novoEstoque);
+            salgadoDAO.update(salgadoEstoque);
         }
 
         pedido.setStatus(StatusPedido.CONFIRMADO);
