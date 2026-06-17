@@ -66,6 +66,14 @@ public class MovimentoDAOImpl implements MovimentoDAO {
     }
 
     @Override
+    public List<Movimento> findByPedidoId(Long pedidoId) {
+        TypedQuery<Movimento> query = entityManager.createQuery(
+                "SELECT m FROM Movimento m WHERE m.pedido.id = :pedidoId", Movimento.class);
+        query.setParameter("pedidoId", pedidoId);
+        return query.getResultList();
+    }
+
+    @Override
     public List<Movimento> findByDataHoraBetween(LocalDateTime startDate, LocalDateTime endDate) {
         TypedQuery<Movimento> query = entityManager.createQuery(
                 "SELECT m FROM Movimento m WHERE m.dataHora BETWEEN :startDate AND :endDate", Movimento.class);

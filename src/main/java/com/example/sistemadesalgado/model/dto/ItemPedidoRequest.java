@@ -9,7 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ItemPedidoRequest {
     private Long salgadoId;
-    private String sabor;
     private Integer quantidade;
-    private Double valorUnitario;
 }

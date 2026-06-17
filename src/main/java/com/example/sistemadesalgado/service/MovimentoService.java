@@ -3,6 +3,7 @@ package com.example.sistemadesalgado.service;
 import com.example.sistemadesalgado.dao.MovimentoDAO;
 import com.example.sistemadesalgado.model.entity.Cliente;
 import com.example.sistemadesalgado.model.entity.Movimento;
+import com.example.sistemadesalgado.model.entity.Pedido;
 import com.example.sistemadesalgado.model.enums.TipoMovimento;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,11 +19,16 @@ public class MovimentoService {
     private final MovimentoDAO movimentoDAO;
 
     public Movimento criarMovimento(Cliente cliente, TipoMovimento tipoMovimento, Double valor) {
+        return criarMovimento(cliente, tipoMovimento, valor, null);
+    }
+
+    public Movimento criarMovimento(Cliente cliente, TipoMovimento tipoMovimento, Double valor, Pedido pedido) {
         Movimento movimento = new Movimento();
         movimento.setCliente(cliente);
         movimento.setTipoMovimento(tipoMovimento);
         movimento.setValor(valor);
         movimento.setDataHora(LocalDateTime.now());
+        movimento.setPedido(pedido);
         return movimentoDAO.save(movimento);
     }
 
@@ -67,15 +73,5 @@ public class MovimentoService {
             throw new RuntimeException("Movimento não encontrado com ID: " + id);
         }
         movimentoDAO.deleteById(id);
-    }
-
-    public Double calcularSaldoCliente(Long clienteId) {
-        Double totalCreditos = somarValorPorClienteETipo(clienteId, TipoMovimento.CREDITO);
-        Double totalDebitos = somarValorPorClienteETipo(clienteId, TipoMovimento.DEBITO);
-        
-        if (totalCreditos == null) totalCreditos = 0.0;
-        if (totalDebitos == null) totalDebitos = 0.0;
-        
-        return totalCreditos - totalDebitos;
     }
 }

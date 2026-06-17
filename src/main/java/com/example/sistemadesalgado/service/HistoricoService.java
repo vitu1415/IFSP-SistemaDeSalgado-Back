@@ -57,32 +57,6 @@ public class HistoricoService {
         return movimentoDAO.findHistoricoMovimentosByClienteAndData(clienteId, startDate);
     }
 
-    public Map<String, Object> buscarHistoricoCompleto(Long clienteId, LocalDateTime startDate) {
-        Map<String, Object> historico = new HashMap<>();
-        
-        List<Pedido> pedidos = buscarHistoricoPedidos(clienteId, startDate);
-        List<Movimento> movimentos = buscarHistoricoMovimentos(clienteId, startDate);
-        
-        historico.put("pedidos", pedidos);
-        historico.put("movimentos", movimentos);
-        historico.put("totalPedidos", pedidos.size());
-        historico.put("totalMovimentos", movimentos.size());
-        
-        return historico;
-    }
-
-    public List<Pedido> buscarPedidosPorStatus(Long clienteId, List<StatusPedido> statuses) {
-        return pedidoDAO.findPedidosByClienteAndStatuses(clienteId, statuses);
-    }
-
-    public List<Pedido> buscarPedidosConfirmados(Long clienteId) {
-        return pedidoDAO.findByClienteIdAndStatus(clienteId, StatusPedido.CONFIRMADO);
-    }
-
-    public List<Pedido> buscarPedidosEstornados(Long clienteId) {
-        return pedidoDAO.findByClienteIdAndStatus(clienteId, StatusPedido.ESTORNADO);
-    }
-
     public Double calcularTotalGasto(Long clienteId, LocalDateTime startDate) {
         List<Pedido> pedidos = buscarHistoricoPedidos(clienteId, startDate);
         return pedidos.stream()
@@ -103,10 +77,10 @@ public class HistoricoService {
         Map<String, Double> resumo = new HashMap<>();
         
         Double totalCreditos = movimentoDAO.sumValorByClienteAndTipoMovimento(
-            clienteId, TipoMovimento.CREDITO
+            clienteId, TipoMovimento.Estorno
         );
         Double totalDebitos = movimentoDAO.sumValorByClienteAndTipoMovimento(
-            clienteId, TipoMovimento.DEBITO
+            clienteId, TipoMovimento.Concluido
         );
         
         if (totalCreditos == null) totalCreditos = 0.0;

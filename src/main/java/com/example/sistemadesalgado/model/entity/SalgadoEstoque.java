@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "salgados")
+@Table(name = "salgadosEstoque")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,7 +30,7 @@ public class SalgadoEstoque {
     @Column(nullable = false)
     private Integer estoque;
 
-    @OneToMany(mappedBy = "salgado", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "salgadoEstoque", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ItemPedido> itensPedido = new ArrayList<>();
 

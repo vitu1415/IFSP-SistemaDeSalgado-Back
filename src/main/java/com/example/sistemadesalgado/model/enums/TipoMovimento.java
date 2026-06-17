@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum TipoMovimento {
-    CREDITO("Crédito"),
-    DEBITO("Débito");
+    Estorno("Estorno"),
+    Concluido("Concluido");
 
     private final String descricao;
 

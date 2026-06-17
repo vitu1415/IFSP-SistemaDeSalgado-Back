@@ -11,6 +11,7 @@ import com.example.sistemadesalgado.model.entity.SalgadoEstoque;
 import com.example.sistemadesalgado.model.enums.StatusPedido;
 import com.example.sistemadesalgado.model.enums.TipoMovimento;
 import com.example.sistemadesalgado.model.enums.TipoPreco;
+import com.example.sistemadesalgado.service.MovimentoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,7 @@ import java.util.List;
 public class PedidoCommand implements Command {
 
     private final PedidoDAO pedidoDAO;
+    private final MovimentoService movimentoService;
     private final MovimentoDAO movimentoDAO;
     private final SalgadoDAO salgadoDAO;
 
@@ -63,13 +65,8 @@ public class PedidoCommand implements Command {
         Pedido savedPedido = pedidoDAO.save(pedido);
         pedido = savedPedido;
 
-        // 4. Gerar movimento financeiro (débito)
-        movimento = new Movimento();
-        movimento.setTipoMovimento(TipoMovimento.DEBITO);
-        movimento.setValor(pedido.getValorTotal());
-        movimento.setDataHora(LocalDateTime.now());
-        movimento.setCliente(cliente);
-        movimento = movimentoDAO.save(movimento);
+        // 4. Gerar movimento financeiro (concluido) vinculado ao pedido
+        movimento = movimentoService.criarMovimento(cliente, TipoMovimento.Concluido, pedido.getValorTotal(), pedido);
 
         // 5. Atualizar estoque dos salgados
         for (ItemPedido item : itens) {

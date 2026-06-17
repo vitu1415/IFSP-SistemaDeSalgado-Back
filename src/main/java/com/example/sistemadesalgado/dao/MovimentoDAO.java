@@ -21,6 +21,8 @@ public interface MovimentoDAO {
 
     List<Movimento> findByClienteIdAndTipoMovimento(Long clienteId, TipoMovimento tipoMovimento);
 
+    List<Movimento> findByPedidoId(Long pedidoId);
+
     List<Movimento> findByDataHoraBetween(LocalDateTime startDate, LocalDateTime endDate);
 
     List<Movimento> findHistoricoMovimentosByClienteAndData(Long clienteId, LocalDateTime startDate);

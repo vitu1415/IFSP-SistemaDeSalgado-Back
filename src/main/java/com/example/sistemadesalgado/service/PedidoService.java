@@ -41,8 +41,7 @@ public class PedidoService {
                 salgadoEstoque = salgadoDAO.findById(itemRequest.getSalgadoId())
                         .orElseThrow(() -> new ResourceNotFoundException("Salgado não encontrado"));
             } else {
-                salgadoEstoque = salgadoDAO.findBySabor(itemRequest.getSabor())
-                        .orElseThrow(() -> new ResourceNotFoundException("Salgado não encontrado"));
+                throw new BusinessException("ID do salgado invalido, salgado não encontrado");
             }
 
             if (salgadoEstoque.getEstoque() < itemRequest.getQuantidade()) {

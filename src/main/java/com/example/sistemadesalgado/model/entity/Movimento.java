@@ -35,6 +35,10 @@ public class Movimento {
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pedido_id")
+    private Pedido pedido;
+
     @PrePersist
     protected void onCreate() {
         dataHora = LocalDateTime.now();

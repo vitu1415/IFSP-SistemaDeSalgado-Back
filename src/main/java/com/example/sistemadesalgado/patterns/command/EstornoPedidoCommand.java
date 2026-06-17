@@ -1,15 +1,16 @@
 package com.example.sistemadesalgado.patterns.command;
 
+import com.example.sistemadesalgado.dao.MovimentoDAO;
 import com.example.sistemadesalgado.dao.PedidoDAO;
 import com.example.sistemadesalgado.dao.SalgadoDAO;
 import com.example.sistemadesalgado.model.entity.ItemPedido;
+import com.example.sistemadesalgado.model.entity.Movimento;
 import com.example.sistemadesalgado.model.entity.Pedido;
 import com.example.sistemadesalgado.model.entity.SalgadoEstoque;
 import com.example.sistemadesalgado.model.enums.StatusPedido;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -17,6 +18,7 @@ public class EstornoPedidoCommand implements Command {
 
     private final PedidoDAO pedidoDAO;
     private final SalgadoDAO salgadoDAO;
+    private final MovimentoDAO movimentoDAO;
 
     private Pedido pedido;
     private List<ItemPedido> itens;
@@ -44,6 +46,11 @@ public class EstornoPedidoCommand implements Command {
             salgadoDAO.update(salgadoEstoque);
         }
 
+        List<Movimento> movimentos = movimentoDAO.findByPedidoId(pedido.getId());
+        for (Movimento movimento : movimentos) {
+            movimentoDAO.delete(movimento);
+        }
+
         pedido.setStatus(StatusPedido.ESTORNADO);
         pedido.setAtivo(false);
         pedidoDAO.update(pedido);
@@ -52,6 +59,7 @@ public class EstornoPedidoCommand implements Command {
         System.out.println("ID do Pedido: " + pedido.getId());
         System.out.println("Pedido marcado como inativo");
         System.out.println("Estoque restaurado para todos os itens");
+        System.out.println("Movimentos financeiros removidos: " + movimentos.size());
     }
 
     @Override

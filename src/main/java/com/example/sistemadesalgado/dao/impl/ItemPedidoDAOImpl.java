@@ -37,10 +37,10 @@ public class ItemPedidoDAOImpl implements ItemPedidoDAO {
     }
 
     @Override
-    public List<ItemPedido> findBySalgadoId(Long salgadoId) {
+    public List<ItemPedido> findBySalgadoEstoqueId(Long salgadoEstoqueId) {
         TypedQuery<ItemPedido> query = entityManager.createQuery(
-                "SELECT ip FROM ItemPedido ip WHERE ip.salgado.id = :salgadoId", ItemPedido.class);
-        query.setParameter("salgadoId", salgadoId);
+                "SELECT ip FROM ItemPedido ip WHERE ip.salgadoEstoque.id = :salgadoEstoqueId", ItemPedido.class);
+        query.setParameter("salgadoEstoqueId", salgadoEstoqueId);
         return query.getResultList();
     }
 

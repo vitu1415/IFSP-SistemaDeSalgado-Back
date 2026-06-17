@@ -12,7 +12,7 @@ public interface ItemPedidoDAO {
 
     List<ItemPedido> findByPedidoId(Long pedidoId);
 
-    List<ItemPedido> findBySalgadoId(Long salgadoId);
+    List<ItemPedido> findBySalgadoEstoqueId(Long salgadoEstoqueId);
 
     List<ItemPedido> findByPedidoIds(List<Long> pedidoIds);
 

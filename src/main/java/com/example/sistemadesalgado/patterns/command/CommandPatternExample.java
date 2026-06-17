@@ -29,7 +29,6 @@ public class CommandPatternExample implements CommandLineRunner {
     private final ClienteRepository clienteRepository;
     private final SalgadoRepository salgadoRepository;
     private final PedidoDAO pedidoDAO;
-    private final SalgadoDAO salgadoDAO;
     private final PedidoCommand pedidoCommand;
     private final EstornoPedidoCommand estornoPedidoCommand;
 
@@ -90,16 +89,16 @@ public class CommandPatternExample implements CommandLineRunner {
         // 3. Criar itens do pedido
         ItemPedido item1 = ItemPedido.builder()
                 .salgadoEstoque(salgadoEstoque1)
-                .sabor("Frango")
+                .sabor(salgadoEstoque1.getSabor())
                 .quantidade(10)
-                .valorUnitario(5.00)
+                .valorUnitario(salgadoEstoque1.getPreco())
                 .build();
 
         ItemPedido item2 = ItemPedido.builder()
                 .salgadoEstoque(salgadoEstoque2)
-                .sabor("Queijo")
+                .sabor(salgadoEstoque2.getSabor())
                 .quantidade(5)
-                .valorUnitario(4.50)
+                .valorUnitario(salgadoEstoque2.getPreco())
                 .build();
 
         List<ItemPedido> itens = new ArrayList<>();
@@ -173,9 +172,9 @@ public class CommandPatternExample implements CommandLineRunner {
         // 3. Criar e confirmar pedido manualmente (simulando pedido já existente)
         ItemPedido item = ItemPedido.builder()
                 .salgadoEstoque(salgadoEstoque)
-                .sabor("Catupiry")
+                .sabor(salgadoEstoque.getSabor())
                 .quantidade(20)
-                .valorUnitario(6.50)
+                .valorUnitario(salgadoEstoque.getPreco())
                 .build();
 
         List<ItemPedido> itens = new ArrayList<>();
@@ -183,7 +182,7 @@ public class CommandPatternExample implements CommandLineRunner {
 
         Pedido pedido = Pedido.builder()
                 .cliente(cliente)
-                .valorTotal(130.00)
+                .valorTotal(salgadoEstoque.getPreco() * 20)
                 .status(StatusPedido.CONFIRMADO)
                 .itens(itens)
                 .build();
@@ -277,9 +276,9 @@ public class CommandPatternExample implements CommandLineRunner {
         // 3. Criar primeiro pedido
         ItemPedido item1 = ItemPedido.builder()
                 .salgadoEstoque(salgadoEstoque1)
-                .sabor("Carne")
+                .sabor(salgadoEstoque1.getSabor())
                 .quantidade(15)
-                .valorUnitario(5.50)
+                .valorUnitario(salgadoEstoque1.getPreco())
                 .build();
 
         List<ItemPedido> itens1 = new ArrayList<>();
@@ -296,9 +295,9 @@ public class CommandPatternExample implements CommandLineRunner {
         // 4. Criar segundo pedido
         ItemPedido item2 = ItemPedido.builder()
                 .salgadoEstoque(salgadoEstoque2)
-                .sabor("Frango")
+                .sabor(salgadoEstoque2.getSabor())
                 .quantidade(25)
-                .valorUnitario(5.00)
+                .valorUnitario(salgadoEstoque2.getPreco())
                 .build();
 
         List<ItemPedido> itens2 = new ArrayList<>();

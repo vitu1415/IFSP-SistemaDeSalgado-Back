@@ -13,7 +13,7 @@ public interface ItemPedidoRepository extends JpaRepository<ItemPedido, Long> {
 
     List<ItemPedido> findByPedidoId(Long pedidoId);
 
-    List<ItemPedido> findBySalgadoId(Long salgadoId);
+    List<ItemPedido> findBySalgadoEstoqueId(Long salgadoEstoqueId);
 
     @Query("SELECT ip FROM ItemPedido ip WHERE ip.pedido.id IN :pedidoIds")
     List<ItemPedido> findByPedidoIds(@Param("pedidoIds") List<Long> pedidoIds);
