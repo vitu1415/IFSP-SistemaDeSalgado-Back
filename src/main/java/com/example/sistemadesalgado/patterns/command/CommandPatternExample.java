@@ -1,5 +1,6 @@
 package com.example.sistemadesalgado.patterns.command;
 
+import com.example.sistemadesalgado.dao.ClienteDAO;
 import com.example.sistemadesalgado.dao.PedidoDAO;
 import com.example.sistemadesalgado.dao.SalgadoDAO;
 import com.example.sistemadesalgado.model.entity.Cliente;
@@ -8,8 +9,6 @@ import com.example.sistemadesalgado.model.entity.Pedido;
 import com.example.sistemadesalgado.model.entity.SalgadoEstoque;
 import com.example.sistemadesalgado.model.enums.StatusPedido;
 import com.example.sistemadesalgado.patterns.factory.Salgado;
-import com.example.sistemadesalgado.repository.ClienteRepository;
-import com.example.sistemadesalgado.repository.SalgadoRepository;
 import lombok.RequiredArgsConstructor;
 import com.example.sistemadesalgado.patterns.factory.concretas.FrangoFactory;
 import com.example.sistemadesalgado.patterns.factory.concretas.QueijoFactory;
@@ -26,8 +25,8 @@ import java.util.List;
 public class CommandPatternExample implements CommandLineRunner {
 
     private final CommandInvoker commandInvoker;
-    private final ClienteRepository clienteRepository;
-    private final SalgadoRepository salgadoRepository;
+    private final ClienteDAO clienteDAO;
+    private final SalgadoDAO salgadoDAO;
     private final PedidoDAO pedidoDAO;
     private final PedidoCommand pedidoCommand;
     private final EstornoPedidoCommand estornoPedidoCommand;
@@ -57,7 +56,7 @@ public class CommandPatternExample implements CommandLineRunner {
                 .email("joao@email.com")
                 .senha("123456")
                 .build();
-        cliente = clienteRepository.save(cliente);
+        cliente = clienteDAO.save(cliente);
         System.out.println("Cliente criado: " + cliente.getNome() + " (ID: " + cliente.getId() + ")");
 
         // 2. Criar salgados com estoque (usando factories concretas do patterns.factory)
@@ -67,10 +66,10 @@ public class CommandPatternExample implements CommandLineRunner {
                 .preco(salgado1.getPreco())
                 .estoque(100)
                 .build();
-        if (!salgadoRepository.existsBySabor(salgadoEstoque1.getSabor())) {
-            salgadoEstoque1 = salgadoRepository.save(salgadoEstoque1);
+        if (!salgadoDAO.existsBySabor(salgadoEstoque1.getSabor())) {
+            salgadoEstoque1 = salgadoDAO.save(salgadoEstoque1);
         } else {
-            salgadoEstoque1 = salgadoRepository.findBySabor(salgadoEstoque1.getSabor()).orElseThrow();
+            salgadoEstoque1 = salgadoDAO.findBySabor(salgadoEstoque1.getSabor()).orElseThrow();
         }
 
         Salgado salgado2 = new QueijoFactory().criarSalgado();
@@ -79,10 +78,10 @@ public class CommandPatternExample implements CommandLineRunner {
                 .preco(salgado2.getPreco())
                 .estoque(50)
                 .build();
-        if (!salgadoRepository.existsBySabor(salgadoEstoque2.getSabor())) {
-            salgadoEstoque2 = salgadoRepository.save(salgadoEstoque2);
+        if (!salgadoDAO.existsBySabor(salgadoEstoque2.getSabor())) {
+            salgadoEstoque2 = salgadoDAO.save(salgadoEstoque2);
         } else {
-            salgadoEstoque2 = salgadoRepository.findBySabor(salgadoEstoque2.getSabor()).orElseThrow();
+            salgadoEstoque2 = salgadoDAO.findBySabor(salgadoEstoque2.getSabor()).orElseThrow();
         }
         System.out.println("Salgados criados com estoque inicial");
 
@@ -122,8 +121,8 @@ public class CommandPatternExample implements CommandLineRunner {
         System.out.println("  Movimento Financeiro: " + pedidoCommand.getMovimento().getTipoMovimento().getDescricao());
         
         // Atualizar salgados para verificar estoque
-        salgadoEstoque1 = salgadoRepository.findById(salgadoEstoque1.getId()).orElseThrow();
-        salgadoEstoque2 = salgadoRepository.findById(salgadoEstoque2.getId()).orElseThrow();
+        salgadoEstoque1 = salgadoDAO.findById(salgadoEstoque1.getId()).orElseThrow();
+        salgadoEstoque2 = salgadoDAO.findById(salgadoEstoque2.getId()).orElseThrow();
         System.out.println("  Estoque Frango: " + salgadoEstoque1.getEstoque());
         System.out.println("  Estoque Queijo: " + salgadoEstoque2.getEstoque());
 
@@ -135,8 +134,8 @@ public class CommandPatternExample implements CommandLineRunner {
         System.out.println("  Status do Pedido: " + pedidoCommand.getPedido().getStatus());
         
         // Atualizar salgados para verificar estoque restaurado
-        salgadoEstoque1 = salgadoRepository.findById(salgadoEstoque1.getId()).orElseThrow();
-        salgadoEstoque2 = salgadoRepository.findById(salgadoEstoque2.getId()).orElseThrow();
+        salgadoEstoque1 = salgadoDAO.findById(salgadoEstoque1.getId()).orElseThrow();
+        salgadoEstoque2 = salgadoDAO.findById(salgadoEstoque2.getId()).orElseThrow();
         System.out.println("  Estoque Frango: " + salgadoEstoque1.getEstoque() + " (restaurado)");
         System.out.println("  Estoque Queijo: " + salgadoEstoque2.getEstoque() + " (restaurado)");
 
@@ -152,7 +151,7 @@ public class CommandPatternExample implements CommandLineRunner {
                 .email("maria@email.com")
                 .senha("123456")
                 .build();
-        cliente = clienteRepository.save(cliente);
+        cliente = clienteDAO.save(cliente);
         System.out.println("Cliente criado: " + cliente.getNome() + " (ID: " + cliente.getId() + ")");
 
         // 2. Criar salgado com estoque (factory concreta)
@@ -162,14 +161,14 @@ public class CommandPatternExample implements CommandLineRunner {
                 .preco(salgadoFrangoCatupiry.getPreco())
                 .estoque(80)
                 .build();
-        if (!salgadoRepository.existsBySabor(salgadoEstoque.getSabor())) {
-            salgadoEstoque = salgadoRepository.save(salgadoEstoque);
+        if (!salgadoDAO.existsBySabor(salgadoEstoque.getSabor())) {
+            salgadoEstoque = salgadoDAO.save(salgadoEstoque);
         } else {
-            salgadoEstoque = salgadoRepository.findBySabor(salgadoEstoque.getSabor()).orElseThrow();
+            salgadoEstoque = salgadoDAO.findBySabor(salgadoEstoque.getSabor()).orElseThrow();
         }
         System.out.println("Salgado criado: " + salgadoEstoque.getSabor() + " (Estoque: " + salgadoEstoque.getEstoque() + ")");
 
-        // 3. Criar e confirmar pedido manualmente (simulando pedido já existente)
+        // 3. Criar itens do pedido
         ItemPedido item = ItemPedido.builder()
                 .salgadoEstoque(salgadoEstoque)
                 .sabor(salgadoEstoque.getSabor())
@@ -180,56 +179,45 @@ public class CommandPatternExample implements CommandLineRunner {
         List<ItemPedido> itens = new ArrayList<>();
         itens.add(item);
 
-        Pedido pedido = Pedido.builder()
-                .cliente(cliente)
-                .valorTotal(salgadoEstoque.getPreco() * 20)
-                .status(StatusPedido.CONFIRMADO)
-                .itens(itens)
-                .build();
-        
-        // Associar itens ao pedido antes de salvar
-        itens.forEach(i -> i.setPedido(pedido));
-        
-        Pedido savedPedido = pedidoDAO.save(pedido);
-        
-        // Atualizar estoque (simulando que o pedido já foi processado)
-        salgadoEstoque.setEstoque(salgadoEstoque.getEstoque() - 20);
-        salgadoEstoque = salgadoRepository.save(salgadoEstoque);
-        
-        System.out.println("Pedido confirmado manualmente:");
+        // 4. Executar PedidoCommand para criar pedido + movimento financeiro + atualizar estoque
+        System.out.println("\n--- EXECUTANDO PEDIDO COMMAND ---");
+        pedidoCommand.setPedidoData(cliente, itens);
+        pedidoCommand.execute();
+        Pedido savedPedido = pedidoCommand.getPedido();
+
+        System.out.println("Pedido criado com movimento financeiro:");
         System.out.println("  ID do Pedido: " + savedPedido.getId());
         System.out.println("  Status: " + savedPedido.getStatus());
         System.out.println("  Valor Total: R$ " + savedPedido.getValorTotal());
+        System.out.println("  Movimento ID: " + pedidoCommand.getMovimento().getId());
+        System.out.println("  Movimento Tipo: " + pedidoCommand.getMovimento().getTipoMovimento().getDescricao());
+        System.out.println("  Movimento Valor: R$ " + pedidoCommand.getMovimento().getValor());
+
+        salgadoEstoque = salgadoDAO.findById(salgadoEstoque.getId()).orElseThrow();
         System.out.println("  Estoque atual: " + salgadoEstoque.getEstoque());
 
-        // 4. Executar EstornoPedidoCommand
+        // 5. Executar EstornoPedidoCommand (deleta o movimento vinculado)
         System.out.println("\n--- EXECUTANDO ESTORNO PEDIDO COMMAND ---");
         estornoPedidoCommand.setPedido(savedPedido);
-        
-        System.out.println("Antes do estorno:");
-        System.out.println("  Status do Pedido: " + savedPedido.getStatus());
-        System.out.println("  Estoque: " + salgadoEstoque.getEstoque());
-        
         estornoPedidoCommand.execute();
-        
+
         System.out.println("\nApós o estorno:");
         System.out.println("  Status do Pedido: " + estornoPedidoCommand.getPedido().getStatus());
         System.out.println("  Pedido ativo: " + estornoPedidoCommand.getPedido().getAtivo());
-        
-        // Atualizar salgado para verificar estoque
-        salgadoEstoque = salgadoRepository.findById(salgadoEstoque.getId()).orElseThrow();
-        System.out.println("  Estoque: " + salgadoEstoque.getEstoque() + " (restaurado)");
 
-        // 5. Desfazer EstornoPedidoCommand
+        salgadoEstoque = salgadoDAO.findById(salgadoEstoque.getId()).orElseThrow();
+        System.out.println("  Estoque: " + salgadoEstoque.getEstoque() + " (restaurado)");
+        System.out.println("  Movimento financeiro removido ao estornar o pedido");
+
+        // 6. Desfazer EstornoPedidoCommand
         System.out.println("\n--- DESFAZENDO ESTORNO PEDIDO COMMAND ---");
         estornoPedidoCommand.undo();
-        
+
         System.out.println("Após o undo do estorno:");
         System.out.println("  Status do Pedido: " + estornoPedidoCommand.getPedido().getStatus());
         System.out.println("  Pedido ativo: " + estornoPedidoCommand.getPedido().getAtivo());
-        
-        // Atualizar salgado para verificar estoque
-        salgadoEstoque = salgadoRepository.findById(salgadoEstoque.getId()).orElseThrow();
+
+        salgadoEstoque = salgadoDAO.findById(salgadoEstoque.getId()).orElseThrow();
         System.out.println("  Estoque: " + salgadoEstoque.getEstoque() + " (deduzido novamente)");
 
         System.out.println("\n### FIM DO EXEMPLO 2 ###\n");
@@ -244,7 +232,7 @@ public class CommandPatternExample implements CommandLineRunner {
                 .email("pedro@email.com")
                 .senha("123456")
                 .build();
-        cliente = clienteRepository.save(cliente);
+        cliente = clienteDAO.save(cliente);
         System.out.println("Cliente criado: " + cliente.getNome());
 
         // 2. Criar salgados (usando factories concretas)
@@ -254,10 +242,10 @@ public class CommandPatternExample implements CommandLineRunner {
                 .preco(salgadoCarne.getPreco())
                 .estoque(200)
                 .build();
-        if (!salgadoRepository.existsBySabor(salgadoEstoque1.getSabor())) {
-            salgadoEstoque1 = salgadoRepository.save(salgadoEstoque1);
+        if (!salgadoDAO.existsBySabor(salgadoEstoque1.getSabor())) {
+            salgadoEstoque1 = salgadoDAO.save(salgadoEstoque1);
         } else {
-            salgadoEstoque1 = salgadoRepository.findBySabor(salgadoEstoque1.getSabor()).orElseThrow();
+            salgadoEstoque1 = salgadoDAO.findBySabor(salgadoEstoque1.getSabor()).orElseThrow();
         }
 
         Salgado salgadoFrango = new FrangoFactory().criarSalgado();
@@ -266,10 +254,10 @@ public class CommandPatternExample implements CommandLineRunner {
                 .preco(salgadoFrango.getPreco())
                 .estoque(150)
                 .build();
-        if (!salgadoRepository.existsBySabor(salgadoEstoque2.getSabor())) {
-            salgadoEstoque2 = salgadoRepository.save(salgadoEstoque2);
+        if (!salgadoDAO.existsBySabor(salgadoEstoque2.getSabor())) {
+            salgadoEstoque2 = salgadoDAO.save(salgadoEstoque2);
         } else {
-            salgadoEstoque2 = salgadoRepository.findBySabor(salgadoEstoque2.getSabor()).orElseThrow();
+            salgadoEstoque2 = salgadoDAO.findBySabor(salgadoEstoque2.getSabor()).orElseThrow();
         }
         System.out.println("Salgados criados");
 

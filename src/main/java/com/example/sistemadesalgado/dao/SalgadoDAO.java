@@ -13,15 +13,9 @@ public interface SalgadoDAO {
 
     Optional<SalgadoEstoque> findBySabor(String sabor);
 
-    List<SalgadoEstoque> findAll();
-
-    List<SalgadoEstoque> findByEstoqueGreaterThan(Integer estoque);
-
-    List<SalgadoEstoque> findByEstoqueGreaterThanOrderByPrecoAsc(Integer estoque);
-
-    List<SalgadoEstoque> findBySaborContainingIgnoreCase(String sabor);
-
     boolean existsBySabor(String sabor);
+
+    List<SalgadoEstoque> findAll();
 
     SalgadoEstoque update(SalgadoEstoque salgadoEstoque);
 

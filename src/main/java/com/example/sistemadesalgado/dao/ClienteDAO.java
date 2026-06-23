@@ -20,6 +20,4 @@ public interface ClienteDAO {
     Cliente update(Cliente cliente);
 
     void deleteById(Long id);
-
-    void delete(Cliente cliente);
 }

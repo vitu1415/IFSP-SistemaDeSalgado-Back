@@ -1,45 +1,36 @@
 package com.example.sistemadesalgado.patterns.state;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.stereotype.Component;
+import com.example.sistemadesalgado.model.entity.Pedido;
+import com.example.sistemadesalgado.model.enums.StatusPedido;
 
-@Component
-@Getter
-@Setter
 public class PedidoContext {
 
-    private PedidoState estado;
+    private final Pedido pedido;
 
-    public PedidoContext() {
-        this.estado = new PedidoCriadoState();
+    public PedidoContext(Pedido pedido) {
+        this.pedido = pedido;
     }
 
-    public void preparar() {
-        System.out.println("\n=== AÇÃO: PREPARAR PEDIDO ===");
-        System.out.println("Estado atual: " + estado.getNomeEstado());
-        estado.preparar(this);
-        System.out.println("Novo estado: " + estado.getNomeEstado());
-        System.out.println("=== FIM DA AÇÃO ===\n");
+    public boolean preparar() {
+        PedidoState estado = fromStatus(pedido.getStatus());
+        return estado.preparar(pedido);
     }
 
-    public void entregar() {
-        System.out.println("\n=== AÇÃO: ENTREGAR PEDIDO ===");
-        System.out.println("Estado atual: " + estado.getNomeEstado());
-        estado.entregar(this);
-        System.out.println("Novo estado: " + estado.getNomeEstado());
-        System.out.println("=== FIM DA AÇÃO ===\n");
+    public boolean entregar() {
+        PedidoState estado = fromStatus(pedido.getStatus());
+        return estado.entregar(pedido);
     }
 
-    public void cancelar() {
-        System.out.println("\n=== AÇÃO: CANCELAR PEDIDO ===");
-        System.out.println("Estado atual: " + estado.getNomeEstado());
-        estado.cancelar(this);
-        System.out.println("Novo estado: " + estado.getNomeEstado());
-        System.out.println("=== FIM DA AÇÃO ===\n");
+    public boolean cancelar() {
+        PedidoState estado = fromStatus(pedido.getStatus());
+        return estado.cancelar(pedido);
     }
 
-    public String getEstadoAtual() {
-        return estado.getNomeEstado();
+    private PedidoState fromStatus(StatusPedido status) {
+        return switch (status) {
+            case CRIADO -> new PedidoCriadoState();
+            case CONFIRMADO -> new PedidoPreparandoState();
+            case ESTORNADO -> new PedidoCanceladoState();
+        };
     }
 }

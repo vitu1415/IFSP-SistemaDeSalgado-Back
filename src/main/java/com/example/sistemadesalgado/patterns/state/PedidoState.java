@@ -1,12 +1,15 @@
 package com.example.sistemadesalgado.patterns.state;
 
+import com.example.sistemadesalgado.model.entity.Pedido;
+import com.example.sistemadesalgado.model.enums.StatusPedido;
+
 public interface PedidoState {
 
-    void preparar(PedidoContext context);
+    boolean preparar(Pedido pedido);
 
-    void entregar(PedidoContext context);
+    boolean entregar(Pedido pedido);
 
-    void cancelar(PedidoContext context);
+    boolean cancelar(Pedido pedido);
 
-    String getNomeEstado();
+    StatusPedido getStatus();
 }

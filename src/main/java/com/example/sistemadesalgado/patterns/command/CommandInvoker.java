@@ -19,16 +19,24 @@ public class CommandInvoker {
 
     private final Stack<Command> commandHistory = new Stack<>();
 
-    public void executePedidoCommand(Cliente cliente, List<ItemPedido> itens, TipoPreco tipoPreco) {
+    public Pedido executePedidoCommand(Cliente cliente, List<ItemPedido> itens, TipoPreco tipoPreco) {
         pedidoCommand.setPedidoData(cliente, itens, tipoPreco);
         pedidoCommand.execute();
         commandHistory.push(pedidoCommand);
+        return pedidoCommand.getPedido();
     }
 
-    public void executeEstornoCommand(Pedido pedido) {
+    public Pedido executeEstornoCommand(Pedido pedido) {
         estornoPedidoCommand.setPedido(pedido);
         estornoPedidoCommand.execute();
         commandHistory.push(estornoPedidoCommand);
+        return estornoPedidoCommand.getPedido();
+    }
+
+    public void undoLastCommand() {
+        if (!commandHistory.isEmpty()) {
+            commandHistory.pop().undo();
+        }
     }
 
     public int getCommandHistorySize() {

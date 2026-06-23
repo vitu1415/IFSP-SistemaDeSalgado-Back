@@ -3,7 +3,6 @@ package com.example.sistemadesalgado.service;
 import com.example.sistemadesalgado.dao.PedidoDAO;
 import com.example.sistemadesalgado.dao.SalgadoDAO;
 import com.example.sistemadesalgado.exception.BusinessException;
-import com.example.sistemadesalgado.exception.InternalServerException;
 import com.example.sistemadesalgado.exception.ResourceNotFoundException;
 import com.example.sistemadesalgado.model.dto.ItemPedidoRequest;
 import com.example.sistemadesalgado.model.dto.PedidoRequest;
@@ -13,11 +12,14 @@ import com.example.sistemadesalgado.model.entity.Pedido;
 import com.example.sistemadesalgado.model.entity.SalgadoEstoque;
 import com.example.sistemadesalgado.model.enums.TipoPreco;
 import com.example.sistemadesalgado.patterns.command.CommandInvoker;
+import com.example.sistemadesalgado.patterns.observer.EstoqueObserver;
+import com.example.sistemadesalgado.patterns.observer.HistoricoObserver;
 import com.example.sistemadesalgado.patterns.observer.PedidoSubject;
 import com.example.sistemadesalgado.patterns.state.PedidoContext;
 import com.example.sistemadesalgado.patterns.strategy.CalculoPrecoContext;
 import com.example.sistemadesalgado.patterns.strategy.CalculoPrecoStrategy;
 import com.example.sistemadesalgado.patterns.strategy.CalculoPrecoStrategyFactory;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,14 @@ public class PedidoService {
     private final CalculoPrecoStrategyFactory calculoPrecoStrategyFactory;
     private final PedidoSubject pedidoSubject;
     private final CalculoPrecoContext calculoPrecoContext;
+    private final HistoricoObserver historicoObserver;
+    private final EstoqueObserver estoqueObserver;
+
+    @PostConstruct
+    public void init() {
+        pedidoSubject.attach(historicoObserver);
+        pedidoSubject.attach(estoqueObserver);
+    }
 
     public Pedido criarPedido(Cliente cliente, List<ItemPedido> itens, PedidoRequest pedidoRequest) {
         for (ItemPedidoRequest itemRequest : pedidoRequest.getItens()) {
@@ -70,22 +80,17 @@ public class PedidoService {
             item.setValorUnitario(precoCalculado / item.getQuantidade());
         }
 
-        // Usa Command Pattern para criar pedido
-        commandInvoker.executePedidoCommand(cliente, itens, tipoPreco);
-        
-        // Obtém o pedido criado pelo comando
-        Pedido pedido = pedidoDAO.findByClienteId(cliente.getId()).stream()
-                .reduce((first, second) -> second)
-                .orElseThrow(() -> new InternalServerException("Falha ao criar pedido"));
+        Pedido pedido = commandInvoker.executePedidoCommand(cliente, itens, tipoPreco);
 
-        // Usa Observer Pattern para notificar observers
         pedidoSubject.notifyObservers(pedido);
 
-        // Usa State Pattern para gerenciar estado
-        PedidoContext pedidoContext = new PedidoContext();
-        pedidoContext.preparar(); // CRIADO -> PREPARANDO
+        stateTransition(pedido, "preparar");
 
         return pedido;
+    }
+
+    public List<Pedido> listarTodos() {
+        return pedidoDAO.findAllOrderByDataCriacaoDesc();
     }
 
     public Pedido buscarPorId(Long id) {
@@ -95,17 +100,25 @@ public class PedidoService {
 
     public Pedido estornarPedido(Long pedidoId) {
         Pedido pedido = buscarPorId(pedidoId);
-        
-        // Usa Command Pattern para estornar pedido
-        commandInvoker.executeEstornoCommand(pedido);
-        
-        // Usa Observer Pattern para notificar observers
+        pedido = commandInvoker.executeEstornoCommand(pedido);
+
         pedidoSubject.notifyObservers(pedido);
-        
-        // Usa State Pattern para gerenciar estado
-        PedidoContext pedidoContext = new PedidoContext();
-        pedidoContext.cancelar(); // CANCELADO (simula estorno como cancelamento)
+
+        stateTransition(pedido, "cancelar");
 
         return pedido;
+    }
+
+    private void stateTransition(Pedido pedido, String acao) {
+        PedidoContext pedidoContext = new PedidoContext(pedido);
+        boolean sucesso = switch (acao) {
+            case "preparar" -> pedidoContext.preparar();
+            case "entregar" -> pedidoContext.entregar();
+            case "cancelar" -> pedidoContext.cancelar();
+            default -> false;
+        };
+        if (sucesso) {
+            pedidoDAO.update(pedido);
+        }
     }
 }

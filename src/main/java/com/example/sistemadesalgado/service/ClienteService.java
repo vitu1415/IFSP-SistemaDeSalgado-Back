@@ -57,7 +57,7 @@ public class ClienteService {
         var clienteOpt = buscarPorEmail(loginRequest.getEmail());
 
         if (clienteOpt.isEmpty()) {
-            return new LoginResponse(null, null, null, "Email não encontrado");
+            throw new ResourceNotFoundException("Cliente não encontrado com email: " + loginRequest.getEmail());
         }
 
         var cliente = clienteOpt.get();

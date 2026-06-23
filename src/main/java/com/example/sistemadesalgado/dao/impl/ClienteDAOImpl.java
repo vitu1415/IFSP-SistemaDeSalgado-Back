@@ -72,10 +72,4 @@ public class ClienteDAOImpl implements ClienteDAO {
             entityManager.remove(cliente);
         }
     }
-
-    @Override
-    @Transactional
-    public void delete(Cliente cliente) {
-        entityManager.remove(cliente);
-    }
 }

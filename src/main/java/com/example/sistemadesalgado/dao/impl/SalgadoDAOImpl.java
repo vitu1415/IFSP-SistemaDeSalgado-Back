@@ -44,42 +44,18 @@ public class SalgadoDAOImpl implements SalgadoDAO {
     }
 
     @Override
-    public List<SalgadoEstoque> findAll() {
-        TypedQuery<SalgadoEstoque> query = entityManager.createQuery(
-                "SELECT s FROM SalgadoEstoque s", SalgadoEstoque.class);
-        return query.getResultList();
-    }
-
-    @Override
-    public List<SalgadoEstoque> findByEstoqueGreaterThan(Integer estoque) {
-        TypedQuery<SalgadoEstoque> query = entityManager.createQuery(
-                "SELECT s FROM SalgadoEstoque s WHERE s.estoque > :estoque", SalgadoEstoque.class);
-        query.setParameter("estoque", estoque);
-        return query.getResultList();
-    }
-
-    @Override
-    public List<SalgadoEstoque> findByEstoqueGreaterThanOrderByPrecoAsc(Integer estoque) {
-        TypedQuery<SalgadoEstoque> query = entityManager.createQuery(
-                "SELECT s FROM SalgadoEstoque s WHERE s.estoque > :estoque ORDER BY s.preco ASC", SalgadoEstoque.class);
-        query.setParameter("estoque", estoque);
-        return query.getResultList();
-    }
-
-    @Override
-    public List<SalgadoEstoque> findBySaborContainingIgnoreCase(String sabor) {
-        TypedQuery<SalgadoEstoque> query = entityManager.createQuery(
-                "SELECT s FROM SalgadoEstoque s WHERE LOWER(s.sabor) LIKE LOWER(:sabor)", SalgadoEstoque.class);
-        query.setParameter("sabor", "%" + sabor + "%");
-        return query.getResultList();
-    }
-
-    @Override
     public boolean existsBySabor(String sabor) {
         TypedQuery<Long> query = entityManager.createQuery(
                 "SELECT COUNT(s) FROM SalgadoEstoque s WHERE s.sabor = :sabor", Long.class);
         query.setParameter("sabor", sabor);
         return query.getSingleResult() > 0;
+    }
+
+    @Override
+    public List<SalgadoEstoque> findAll() {
+        TypedQuery<SalgadoEstoque> query = entityManager.createQuery(
+                "SELECT s FROM SalgadoEstoque s", SalgadoEstoque.class);
+        return query.getResultList();
     }
 
     @Override

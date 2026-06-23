@@ -112,6 +112,6 @@ public class MovimentoDAOImpl implements MovimentoDAO {
     @Override
     @Transactional
     public void delete(Movimento movimento) {
-        entityManager.remove(movimento);
+        entityManager.remove(entityManager.merge(movimento));
     }
 }

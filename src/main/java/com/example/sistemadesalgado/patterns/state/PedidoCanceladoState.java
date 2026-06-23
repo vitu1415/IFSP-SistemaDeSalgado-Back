@@ -1,27 +1,27 @@
 package com.example.sistemadesalgado.patterns.state;
 
-import org.springframework.stereotype.Component;
+import com.example.sistemadesalgado.model.entity.Pedido;
+import com.example.sistemadesalgado.model.enums.StatusPedido;
 
-@Component
 public class PedidoCanceladoState implements PedidoState {
 
     @Override
-    public void preparar(PedidoContext context) {
-        throw new IllegalStateException("Não é possível preparar um pedido cancelado. Estado atual: " + getNomeEstado());
+    public boolean preparar(Pedido pedido) {
+        return false;
     }
 
     @Override
-    public void entregar(PedidoContext context) {
-        throw new IllegalStateException("Não é possível entregar um pedido cancelado. Estado atual: " + getNomeEstado());
+    public boolean entregar(Pedido pedido) {
+        return false;
     }
 
     @Override
-    public void cancelar(PedidoContext context) {
-        throw new IllegalStateException("O pedido já está cancelado. Estado atual: " + getNomeEstado());
+    public boolean cancelar(Pedido pedido) {
+        return false;
     }
 
     @Override
-    public String getNomeEstado() {
-        return "CANCELADO";
+    public StatusPedido getStatus() {
+        return StatusPedido.ESTORNADO;
     }
 }

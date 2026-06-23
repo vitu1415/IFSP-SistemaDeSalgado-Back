@@ -1,7 +1,7 @@
 package com.example.sistemadesalgado.controller;
 
 import com.example.sistemadesalgado.exception.ResourceNotFoundException;
-import com.example.sistemadesalgado.mapper.PedidoMapper;
+import com.example.sistemadesalgado.builder.PedidoMapper;
 import com.example.sistemadesalgado.model.dto.PedidoRequest;
 import com.example.sistemadesalgado.model.dto.PedidoResponse;
 import com.example.sistemadesalgado.model.entity.Cliente;
@@ -25,6 +25,14 @@ public class PedidoController {
     private final PedidoService pedidoService;
     private final ClienteService clienteService;
     private final PedidoMapper pedidoMapper;
+
+    @GetMapping
+    public ResponseEntity<List<PedidoResponse>> listarTodos() {
+        List<Pedido> pedidos = pedidoService.listarTodos();
+        return ResponseEntity.ok(pedidos.stream()
+                .map(pedido -> pedidoMapper.toResponse(pedido))
+                .toList());
+    }
 
     @PostMapping
     public ResponseEntity<PedidoResponse> criarPedido(@RequestBody PedidoRequest pedidoRequest) {

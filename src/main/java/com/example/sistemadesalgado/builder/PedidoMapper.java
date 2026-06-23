@@ -1,4 +1,4 @@
-package com.example.sistemadesalgado.mapper;
+package com.example.sistemadesalgado.builder;
 
 import com.example.sistemadesalgado.model.dto.ItemPedidoResponse;
 import com.example.sistemadesalgado.model.dto.MovimentoResponse;
@@ -44,15 +44,6 @@ public class PedidoMapper {
                 pedido.getTipoPreco(),
                 itens,
                 mensagem
-        );
-    }
-
-    public MovimentoResponse toMovimentoResponse(Movimento movimento) {
-        return new MovimentoResponse(
-                movimento.getId(),
-                movimento.getTipoMovimento(),
-                movimento.getValor(),
-                movimento.getDataHora()
         );
     }
 }
